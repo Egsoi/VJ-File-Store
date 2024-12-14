@@ -36,8 +36,6 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import base64
-
-@Client.on_message((filters.document | filters.video | filters.audio) & filters.private & filters.create(allowed))
 async def incoming_gen_link(client, message):
     username = (await client.get_me()).username
     file_type = message.media
@@ -49,31 +47,34 @@ async def incoming_gen_link(client, message):
     user = await get_user(user_id)
     
     if WEBSITE_URL_MODE:
-        website_link = f"{WEBSITE_URL}?Tech_VJ={outstr}"
+        share_link = f"{WEBSITE_URL}?Tech_VJ={outstr}"
+        # Adding direct link here
+        direct_link = f"https://t.me/{username}?start={outstr}"
     else:
-        website_link = f"https://t.me/{username}?start={outstr}"
+        share_link = f"https://t.me/{username}?start={outstr}"
+        direct_link = None
     
     if user["base_site"] and user["shortener_api"] is not None:
-        short_link = await get_short_link(user, website_link)
+        short_link = await get_short_link(user, share_link)
         button_link = short_link
         link_text = "Short Link"
     else:
-        button_link = website_link
+        button_link = share_link
         link_text = "Original Link"
     
-    # Create the second button for the direct link (no shortener applied)
-    direct_link = f"https://t.me/{username}?start={outstr}"
+    # Creating an inline keyboard with the link buttons
+    buttons = [[InlineKeyboardButton(text=link_text, url=button_link)]]
     
-    # Creating an inline keyboard with two buttons
-    keyboard = InlineKeyboardMarkup(
-        [
-            [InlineKeyboardButton(text=link_text, url=button_link)],  # Shortened or Original Link
-            [InlineKeyboardButton(text="Direct Link", url=direct_link)]  # Direct Link
-        ]
+    if WEBSITE_URL_MODE and direct_link:
+        buttons.append([InlineKeyboardButton(text="Direct Link", url=direct_link)])
+    
+    keyboard = InlineKeyboardMarkup(buttons)
+    
+    # Sending the message with the button
+    await message.reply_text(
+        "<b>⭕ ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ:</b>",
+        reply_markup=keyboard
     )
-    
-    # Sending the message with the inline keyboard
-    await message.reply("Here are your links:", reply_markup=keyboard)
 
 @Client.on_message(filters.command(['link', 'plink']) & filters.create(allowed))
 async def gen_link_s(bot, message):
