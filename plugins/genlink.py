@@ -33,12 +33,15 @@ async def allowed(_, __, message):
 # Ask Doubt on telegram @KingVJ01
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+import base64
 
 @Client.on_message((filters.document | filters.video | filters.audio) & filters.private & filters.create(allowed))
 async def incoming_gen_link(client, message):
     username = (await client.get_me()).username
     file_type = message.media
-    file_id, ref = unpack_new_file_id((getattr(message, file_type.value)).file_id)
+    file_id, ref = unpack_new_file_id((getattr(message, file_type.value)).file_id))
     string = 'file_'
     string += file_id
     outstr = base64.urlsafe_b64encode(string.encode("ascii")).decode().strip("=")
@@ -46,28 +49,31 @@ async def incoming_gen_link(client, message):
     user = await get_user(user_id)
     
     if WEBSITE_URL_MODE:
-        share_link = f"{WEBSITE_URL}?Tech_VJ={outstr}"
+        website_link = f"{WEBSITE_URL}?Tech_VJ={outstr}"
     else:
-        share_link = f"https://t.me/{username}?start={outstr}"
+        website_link = f"https://t.me/{username}?start={outstr}"
     
     if user["base_site"] and user["shortener_api"] is not None:
-        short_link = await get_short_link(user, share_link)
+        short_link = await get_short_link(user, website_link)
         button_link = short_link
         link_text = "Short Link"
     else:
-        button_link = share_link
+        button_link = website_link
         link_text = "Original Link"
     
-    # Creating an inline keyboard with the link button
+    # Create the second button for the direct link (no shortener applied)
+    direct_link = f"https://t.me/{username}?start={outstr}"
+    
+    # Creating an inline keyboard with two buttons
     keyboard = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(text=link_text, url=button_link)]]
+        [
+            [InlineKeyboardButton(text=link_text, url=button_link)],  # Shortened or Original Link
+            [InlineKeyboardButton(text="Direct Link", url=direct_link)]  # Direct Link
+        ]
     )
     
-    # Sending the message with the button
-    await message.reply_text(
-        "<b>⭕ ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ:</b>",
-        reply_markup=keyboard
-    )
+    # Sending the message with the inline keyboard
+    await message.reply("Here are your links:", reply_markup=keyboard)
 
 @Client.on_message(filters.command(['link', 'plink']) & filters.create(allowed))
 async def gen_link_s(bot, message):
