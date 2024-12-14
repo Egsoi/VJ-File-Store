@@ -39,7 +39,7 @@ import base64
 async def incoming_gen_link(client, message):
     username = (await client.get_me()).username
     file_type = message.media
-    file_id, ref = unpack_new_file_id((getattr(message, file_type.value)).file_id))
+    file_id, ref = unpack_new_file_id((getattr(message, file_type.value)).file_id)
     string = 'file_'
     string += file_id
     outstr = base64.urlsafe_b64encode(string.encode("ascii")).decode().strip("=")
