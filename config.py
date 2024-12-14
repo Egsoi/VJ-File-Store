@@ -32,14 +32,14 @@ CLONE_MODE = bool(environ.get('CLONE_MODE', True)) # Set True or False
 
 # If Clone Mode Is True Then Fill All Required Variable, If False Then Don't Fill.
 CLONE_DB_URI = environ.get("CLONE_DB_URI", "mongodb+srv://Current:CURRENT@cluster0.efx7m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-CDB_NAME = environ.get("CDB_NAME", "clonetechvj")
+CDB_NAME = environ.get("CDB_NAME", "techvjbotz")
 
 # Database Information
 DB_URI = environ.get("DB_URI", "mongodb+srv://Current:CURRENT@cluster0.efx7m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DB_NAME = environ.get("DB_NAME", "techvjbotz")
 
 # Auto Delete Information
-AUTO_DELETE_MODE = bool(environ.get('AUTO_DELETE_MODE', True)) # Set True or False
+AUTO_DELETE_MODE = bool(environ.get('AUTO_DELETE_MODE', False)) # Set True or False
 
 # If Auto Delete Mode Is True Then Fill All Required Variable, If False Then Don't Fill.
 AUTO_DELETE = int(environ.get("AUTO_DELETE", "30")) # Time in Minutes
