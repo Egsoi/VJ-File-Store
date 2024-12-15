@@ -46,24 +46,30 @@ async def incoming_gen_link(client, message):
     user = await get_user(user_id)
     
     if WEBSITE_URL_MODE:
-        share_link = f"{WEBSITE_URL}?Tech_VJ={outstr}"
+        website_link = f"{WEBSITE_URL}?Tech_VJ={outstr}"
+        direct_link = f"https://t.me/{username}?start={outstr}"
+        
+        # Create two buttons: Website Link and Direct Link
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton(text="Website Link", url=website_link)],
+            [InlineKeyboardButton(text="Direct Link", url=direct_link)]
+        ])
     else:
         share_link = f"https://t.me/{username}?start={outstr}"
+        if user["base_site"] and user["shortener_api"] is not None:
+            short_link = await get_short_link(user, share_link)
+            button_link = short_link
+            link_text = "Short Link"
+        else:
+            button_link = share_link
+            link_text = "Original Link"
+        
+        # Create one button
+        keyboard = InlineKeyboardMarkup(
+            [[InlineKeyboardButton(text=link_text, url=button_link)]]
+        )
     
-    if user["base_site"] and user["shortener_api"] is not None:
-        short_link = await get_short_link(user, share_link)
-        button_link = short_link
-        link_text = "Short Link"
-    else:
-        button_link = share_link
-        link_text = "Original Link"
-    
-    # Creating an inline keyboard with the link button
-    keyboard = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(text=link_text, url=button_link)]]
-    )
-    
-    # Sending the message with the button
+    # Sending the message with the buttons
     await message.reply_text(
         "<b>⭕ ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ:</b>",
         reply_markup=keyboard
