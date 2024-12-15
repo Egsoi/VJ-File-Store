@@ -31,10 +31,12 @@ async def allowed(_, __, message):
 # Don't Remove Credit Tg - @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ01
+from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 @Client.on_message((filters.document | filters.video | filters.audio) & filters.private & filters.create(allowed))
-async def incoming_gen_link(bot, message):
-    username = (await bot.get_me()).username
+async def incoming_gen_link(client, message):
+    username = (await client.get_me()).username
     file_type = message.media
     file_id, ref = unpack_new_file_id((getattr(message, file_type.value)).file_id)
     string = 'file_'
@@ -42,16 +44,31 @@ async def incoming_gen_link(bot, message):
     outstr = base64.urlsafe_b64encode(string.encode("ascii")).decode().strip("=")
     user_id = message.from_user.id
     user = await get_user(user_id)
-    if WEBSITE_URL_MODE == True:
+    
+    if WEBSITE_URL_MODE:
         share_link = f"{WEBSITE_URL}?Tech_VJ={outstr}"
     else:
         share_link = f"https://t.me/{username}?start={outstr}"
-    if user["base_site"] and user["shortener_api"] != None:
+    
+    if user["base_site"] and user["shortener_api"] is not None:
         short_link = await get_short_link(user, share_link)
-        await message.reply(f"<b>⭕ ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ:\n\n🖇️ sʜᴏʀᴛ ʟɪɴᴋ :- {short_link}</b>")
+        button_link = short_link
+        link_text = "Short Link"
     else:
-        await message.reply(f"<b>⭕ ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ:\n\n🔗 ᴏʀɪɢɪɴᴀʟ ʟɪɴᴋ :- {share_link}</b>")
-        
+        button_link = share_link
+        link_text = "Original Link"
+    
+    # Creating an inline keyboard with the link button
+    keyboard = InlineKeyboardMarkup(
+        [[InlineKeyboardButton(text=link_text, url=button_link)]]
+    )
+    
+    # Sending the message with the button
+    await message.reply_text(
+        "<b>⭕ ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ:</b>",
+        reply_markup=keyboard
+    )
+
 
 @Client.on_message(filters.command(['link', 'plink']) & filters.create(allowed))
 async def gen_link_s(bot, message):
